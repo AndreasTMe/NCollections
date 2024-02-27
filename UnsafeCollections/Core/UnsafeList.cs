@@ -20,6 +20,9 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public readonly int Capacity => _capacity;
 
     public readonly int Count => _count;
+    
+    // TODO: GetEnumerator
+    // TODO: GetPinnableReference
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public UnsafeList()
@@ -53,10 +56,31 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         }
     }
 
-    public readonly bool TryGet<TUnmanaged>(int index, out TUnmanaged value)
-        where TUnmanaged : unmanaged
+    public static UnsafeList From<TUnmanaged>(in ReadOnlySpan<TUnmanaged> span)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (typeof(TUnmanaged).TypeHandle.Value != _typeHandle || (uint)index >= (uint)_count)
+        if (span.Length <= 0)
+            return Empty;
+
+        var list = new UnsafeList(span.Length, typeof(TUnmanaged));
+
+        unsafe
+        {
+            fixed (TUnmanaged* ptr = span)
+            {
+                Unsafe.CopyBlock(list._buffer, ptr, (uint)(span.Length * Unsafe.SizeOf<TUnmanaged>()));
+            }
+        }
+
+        list._count = span.Length;
+
+        return list;
+    }
+
+    public readonly bool TryGet<TUnmanaged>(int index, out TUnmanaged value, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if ((checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle) || (uint)index >= (uint)_count)
         {
             value = default;
 
@@ -71,10 +95,10 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         return true;
     }
 
-    public bool TryAdd<TUnmanaged>(in TUnmanaged item)
-        where TUnmanaged : unmanaged
+    public bool TryAdd<TUnmanaged>(in TUnmanaged item, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
             return false;
 
         unsafe
@@ -89,13 +113,101 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         return true;
     }
 
-    // TODO: TryRemove
-    // TODO: TryRemoveAt
-    // TODO: Contains
-    // TODO: IndexOf
-    // TODO: Clear
-    // TODO: GetEnumerator
-    // TODO: GetPinnableReference
+    public bool TryRemove<TUnmanaged>(in TUnmanaged item, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+            return false;
+
+        unsafe
+        {
+            for (var i = 0; i < _count; i++)
+            {
+                if (!Unsafe.Add(ref Unsafe.AsRef<TUnmanaged>(_buffer), i).Equals(item))
+                    continue;
+
+                return TryRemoveAt<TUnmanaged>(i, false);
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryRemoveAt<TUnmanaged>(int index, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if ((checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle) || (uint)index >= (uint)_count)
+            return false;
+
+        unsafe
+        {
+            if (index < _count - 1)
+            {
+                var size = Unsafe.SizeOf<TUnmanaged>();
+
+                Unsafe.CopyBlock(
+                    (byte*)_buffer + index * size,
+                    (byte*)_buffer + (index + 1) * size,
+                    (uint)((_count - index - 1) * size));
+            }
+        }
+
+        _count -= 1;
+
+        return true;
+    }
+
+    public bool Contains<TUnmanaged>(in TUnmanaged item, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+            return false;
+
+        unsafe
+        {
+            for (var i = 0; i < _count; i++)
+            {
+                if (Unsafe.Add(ref Unsafe.AsRef<TUnmanaged>(_buffer), i).Equals(item))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetIndexOf<TUnmanaged>(in TUnmanaged item, out int index, bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        {
+            index = -1;
+
+            return false;
+        }
+
+        unsafe
+        {
+            for (var i = 0; i < _count; i++)
+            {
+                if (!Unsafe.Add(ref Unsafe.AsRef<TUnmanaged>(_buffer), i).Equals(item))
+                    continue;
+
+                index = i;
+
+                return true;
+            }
+        }
+
+        index = -1;
+
+        return false;
+    }
+
+    public void Clear()
+    {
+        if (_count > 0)
+            _count = 0;
+    }
 
     private unsafe void Expand(int size)
     {
