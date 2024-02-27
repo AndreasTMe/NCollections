@@ -20,9 +20,6 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public readonly int Capacity => _capacity;
 
     public readonly int Count => _count;
-    
-    // TODO: GetEnumerator
-    // TODO: GetPinnableReference
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public UnsafeList()
@@ -209,6 +206,27 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
             _count = 0;
     }
 
+    public readonly Enumerator<TUnmanaged> AsEnumerator<TUnmanaged>(bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+            throw new InvalidOperationException("Enumerator data type mismatch.");
+
+        unsafe
+        {
+            return new Enumerator<TUnmanaged>(_buffer, _count);
+        }
+    }
+
+    public readonly PinnableReference<TUnmanaged> AsFixed<TUnmanaged>(bool checkType = true)
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+            throw new InvalidOperationException("Fixed pointer data type mismatch.");
+
+        return new PinnableReference<TUnmanaged>();
+    }
+
     private unsafe void Expand(int size)
     {
         _capacity = _capacity == 0 ? 4 : _capacity * 2;
@@ -254,7 +272,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
                 ^ (!ReferenceEquals(null, typeof(UnsafeList))
                     ? typeof(UnsafeList).GetHashCode()
                     : 0);
-
+            
             unsafe
             {
                 hash = (hash * hashingMultiplier) ^ new IntPtr(_buffer).GetHashCode();
@@ -273,4 +291,74 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public static bool operator ==(UnsafeList lhs, UnsafeList rhs) => lhs.Equals(rhs);
 
     public static bool operator !=(UnsafeList lhs, UnsafeList rhs) => !(lhs == rhs);
+
+    public ref struct Enumerator<TUnmanaged>
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        private readonly unsafe TUnmanaged* _buffer;
+        private readonly int _count;
+        private int _index;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe Enumerator(void* buffer, int count)
+        {
+            _buffer = (TUnmanaged*)buffer;
+            _count = count;
+            _index = -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool MoveNext()
+        {
+            var index = _index + 1;
+
+            if ((uint)index >= (uint)_count)
+            {
+                return false;
+            }
+
+            _index = index;
+
+            return true;
+        }
+
+        public readonly ref TUnmanaged Current
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                unsafe
+                {
+                    return ref _buffer[_index];
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Enumerator<TUnmanaged> GetEnumerator() => this;
+    }
+
+    public ref struct PinnableReference<TUnmanaged>
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    {
+        private readonly unsafe TUnmanaged* _buffer;
+        private readonly int _count;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe PinnableReference(void* buffer, int count)
+        {
+            _buffer = (TUnmanaged*)buffer;
+            _count = count;
+        }
+        
+        public readonly ref TUnmanaged GetPinnableReference()
+        {
+            if (_count != 0)
+            {
+                unsafe { return ref _buffer[0]; }
+            }
+        
+            return ref Unsafe.NullRef<TUnmanaged>();
+        }
+    }
 }
