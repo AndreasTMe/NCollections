@@ -7,19 +7,25 @@ namespace UnsafeCollections.Core;
 [StructLayout(LayoutKind.Sequential)]
 public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
 {
-    private readonly IntPtr _typeHandle;
+    private const int InitialCapacity = 4;
+
+    private readonly RuntimeTypeHandle _typeHandle;
 
     private unsafe void* _buffer;
     private int _capacity;
     private int _count;
 
-    public static UnsafeList Empty { get; } = new();
+    public static UnsafeList Void { get; } = new();
 
-    public readonly IntPtr TypeHandle => _typeHandle;
+    public readonly RuntimeTypeHandle TypeHandle => _typeHandle;
 
     public readonly int Capacity => _capacity;
 
     public readonly int Count => _count;
+
+    public readonly bool IsEmpty => _count == 0;
+
+    public readonly bool IsFull => _count == _capacity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public UnsafeList()
@@ -27,7 +33,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         unsafe
         {
             _buffer = Unsafe.AsPointer(ref Unsafe.NullRef<byte>());
-            _typeHandle = IntPtr.Zero;
+            _typeHandle = default;
             _capacity = _count = 0;
         }
     }
@@ -39,7 +45,8 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
 
         if (capacity <= 0)
         {
-            this = Empty;
+            this = Void;
+            _typeHandle = type.TypeHandle;
 
             return;
         }
@@ -47,7 +54,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         unsafe
         {
             _buffer = NativeMemory.AllocZeroed((nuint)capacity, (nuint)Marshal.SizeOf(type));
-            _typeHandle = type.TypeHandle.Value;
+            _typeHandle = type.TypeHandle;
             _capacity = capacity;
             _count = 0;
         }
@@ -57,7 +64,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
         if (span.Length <= 0)
-            return Empty;
+            return Empty<TUnmanaged>();
 
         var list = new UnsafeList(span.Length, typeof(TUnmanaged));
 
@@ -74,10 +81,14 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         return list;
     }
 
+    public static UnsafeList Empty<TUnmanaged>()
+        where TUnmanaged : unmanaged, IEquatable<TUnmanaged> =>
+        new(0, typeof(TUnmanaged));
+
     public readonly bool TryGet<TUnmanaged>(int index, out TUnmanaged value, bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if ((checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle) || (uint)index >= (uint)_count)
+        if ((checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle)) || (uint)index >= (uint)_count)
         {
             value = default;
 
@@ -95,7 +106,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public bool TryAdd<TUnmanaged>(in TUnmanaged item, bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
 
         unsafe
@@ -103,7 +114,13 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
             if ((uint)_count >= (uint)_capacity)
                 Expand(Unsafe.SizeOf<TUnmanaged>());
 
-            Unsafe.Add(ref Unsafe.AsRef<TUnmanaged>(_buffer), _count) = item;
+            var size = Unsafe.SizeOf<TUnmanaged>();
+
+            Unsafe.CopyBlock(
+                (byte*)_buffer + _count * size,
+                Unsafe.AsPointer(ref Unsafe.AsRef(in item)),
+                (uint)size);
+
             _count += 1;
         }
 
@@ -113,7 +130,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public bool TryRemove<TUnmanaged>(in TUnmanaged item, bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
 
         unsafe
@@ -123,24 +140,23 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
                 if (!Unsafe.Add(ref Unsafe.AsRef<TUnmanaged>(_buffer), i).Equals(item))
                     continue;
 
-                return TryRemoveAt<TUnmanaged>(i, false);
+                return TryRemoveAt(i);
             }
         }
 
         return false;
     }
 
-    public bool TryRemoveAt<TUnmanaged>(int index, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+    public bool TryRemoveAt(int index)
     {
-        if ((checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle) || (uint)index >= (uint)_count)
+        if (_typeHandle.Equals(default) || (uint)index >= (uint)_count)
             return false;
 
         unsafe
         {
             if (index < _count - 1)
             {
-                var size = Unsafe.SizeOf<TUnmanaged>();
+                var size = Marshal.SizeOf(Type.GetTypeFromHandle(_typeHandle)!);
 
                 Unsafe.CopyBlock(
                     (byte*)_buffer + index * size,
@@ -157,7 +173,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public bool Contains<TUnmanaged>(in TUnmanaged item, bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
 
         unsafe
@@ -175,7 +191,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public bool TryGetIndexOf<TUnmanaged>(in TUnmanaged item, out int index, bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
         {
             index = -1;
 
@@ -209,7 +225,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public readonly Enumerator<TUnmanaged> AsEnumerator<TUnmanaged>(bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             throw new InvalidOperationException("Enumerator data type mismatch.");
 
         unsafe
@@ -221,15 +237,18 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public readonly PinnableReference<TUnmanaged> AsFixed<TUnmanaged>(bool checkType = true)
         where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
     {
-        if (checkType && typeof(TUnmanaged).TypeHandle.Value != _typeHandle)
+        if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             throw new InvalidOperationException("Fixed pointer data type mismatch.");
 
-        return new PinnableReference<TUnmanaged>();
+        unsafe
+        {
+            return new PinnableReference<TUnmanaged>(_buffer, _count);
+        }
     }
 
     private unsafe void Expand(int size)
     {
-        _capacity = _capacity == 0 ? 4 : _capacity * 2;
+        _capacity = _capacity == 0 ? InitialCapacity : _capacity * 2;
         _buffer = NativeMemory.Realloc(_buffer, (nuint)(_capacity * size));
     }
 
@@ -237,20 +256,20 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     {
         unsafe
         {
-            if (Equals(Empty))
+            if (Equals(Void))
                 return;
 
             NativeMemory.Free(_buffer);
-            this = Empty;
+            this = Void;
         }
     }
 
-    public bool Equals(UnsafeList other)
+    public readonly bool Equals(UnsafeList other)
     {
         unsafe
         {
             return _buffer == other._buffer
-                && _typeHandle == other._typeHandle
+                && _typeHandle.Value == other._typeHandle.Value
                 && _capacity == other._capacity
                 && _count == other._count
                 && GetHashCode() == other.GetHashCode();
@@ -259,7 +278,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
 
     public override bool Equals(object? obj) => obj is UnsafeList other && Equals(other);
 
-    public override int GetHashCode()
+    public readonly override int GetHashCode()
     {
         unchecked
         {
@@ -272,7 +291,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
                 ^ (!ReferenceEquals(null, typeof(UnsafeList))
                     ? typeof(UnsafeList).GetHashCode()
                     : 0);
-            
+
             unsafe
             {
                 hash = (hash * hashingMultiplier) ^ new IntPtr(_buffer).GetHashCode();
@@ -286,7 +305,8 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         }
     }
 
-    public readonly override string ToString() => $"{nameof(UnsafeList)}[Count: {_count} | Capacity: {_capacity}]";
+    public readonly override string ToString() =>
+        $"{nameof(UnsafeList)}[Count: {_count} | Capacity: {_capacity} | Type: {Type.GetTypeFromHandle(_typeHandle)?.Name ?? "Void"}]";
 
     public static bool operator ==(UnsafeList lhs, UnsafeList rhs) => lhs.Equals(rhs);
 
@@ -350,14 +370,17 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
             _buffer = (TUnmanaged*)buffer;
             _count = count;
         }
-        
+
         public readonly ref TUnmanaged GetPinnableReference()
         {
             if (_count != 0)
             {
-                unsafe { return ref _buffer[0]; }
+                unsafe
+                {
+                    return ref _buffer[0];
+                }
             }
-        
+
             return ref Unsafe.NullRef<TUnmanaged>();
         }
     }
