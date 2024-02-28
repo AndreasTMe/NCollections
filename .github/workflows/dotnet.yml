@@ -1,6 +1,7 @@
 name: Build and run benchmarks
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -9,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
 
     runs-on: ubuntu-latest
 
@@ -35,5 +36,5 @@ jobs:
       - name: Upload Benchmark Results
         uses: actions/upload-artifact@v4
         with:
-          name: Benchmark_Results
-          path: ./BenchmarkDotNet.Artifacts/results/*
+          name: UnsafeCollections.BenchmarkResults
+          path: ./BenchmarkDotNet.Artifacts/results/*.md
