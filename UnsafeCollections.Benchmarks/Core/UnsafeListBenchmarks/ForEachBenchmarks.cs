@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnostics.Windows.Configs;
 
 using System.Collections.Generic;
 
@@ -10,7 +9,6 @@ namespace UnsafeCollections.Benchmarks.Core.UnsafeListBenchmarks;
 [MinColumn]
 [MaxColumn]
 [MemoryDiagnoser]
-[NativeMemoryProfiler]
 public class ForEachBenchmarks
 {
     [Params(0, 10, 100, 1000)]
