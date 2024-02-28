@@ -1,3 +1,5 @@
-﻿using System;
+﻿using BenchmarkDotNet.Running;
 
-Console.WriteLine("Hello, World!");
+using System.Reflection;
+
+BenchmarkRunner.Run(Assembly.GetExecutingAssembly());
