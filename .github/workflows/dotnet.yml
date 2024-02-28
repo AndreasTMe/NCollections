@@ -24,6 +24,11 @@ jobs:
         run: dotnet build --no-restore -c Release
       - name: Publish
         run: dotnet publish -c Release --verbosity normal -o ./publish/
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: UnsafeCollections.Benchmarks
+          path: ./publish/*
           
   run-benchmarks:
     runs-on: ubuntu-latest
@@ -36,3 +41,7 @@ jobs:
         with:
           name: UnsafeCollections.BenchmarkResults
           path: ./BenchmarkDotNet.Artifacts/results/*.md
+      - name: Delete Build Step Artifact
+        uses: GeekyEggo/delete-artifact@v4.1.0
+        with:
+          name: UnsafeCollections.Benchmarks
