@@ -2,6 +2,7 @@ name: Build and run benchmarks
 
 on:
   push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -16,7 +17,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
-      - name: Restore dependencies
+      - name: Restore Dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore -c Release
@@ -29,8 +30,8 @@ jobs:
           path: ./publish/*
       - name: Run Benchmarks
         run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f "UnsafeCollections.Benchmarks.*"
-      - name: Upload benchmark results
+      - name: Upload Benchmark Results
         uses: actions/upload-artifact@v3
         with:
           name: Benchmark_Results
-          path: ./UnsafeCollections.Artifacts/results/*
+          path: ./BenchmarkDotNet.Artifacts/results/*
