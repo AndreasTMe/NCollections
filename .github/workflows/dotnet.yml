@@ -1,0 +1,36 @@
+name: Build and run benchmarks
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore -c Release
+      - name: Publish
+        run: dotnet publish -c Release --verbosity normal -o ./publish/
+      - name: Archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: UnsafeCollections.Benchmarks
+          path: ./publish/*
+      - name: Run Benchmarks
+        run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f "UnsafeCollections.Benchmarks.*"
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Benchmark_Results
+          path: ./UnsafeCollections.Artifacts/results/*
