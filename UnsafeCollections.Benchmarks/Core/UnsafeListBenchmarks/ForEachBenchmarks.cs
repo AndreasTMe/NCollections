@@ -9,6 +9,7 @@ namespace UnsafeCollections.Benchmarks.Core.UnsafeListBenchmarks;
 [MinColumn]
 [MaxColumn]
 [MemoryDiagnoser]
+[MarkdownExporterAttribute.GitHub]
 public class ForEachBenchmarks
 {
     [Params(0, 10, 100, 1000)]
