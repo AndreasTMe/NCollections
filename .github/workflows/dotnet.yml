@@ -1,21 +1,22 @@
 name: Build and run benchmarks
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+    types:
+      - closed
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
       - name: Restore Dependencies
@@ -25,14 +26,14 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release --verbosity normal -o ./publish/
       - name: Archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: UnsafeCollections.Benchmarks
           path: ./publish/*
       - name: Run Benchmarks
         run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f "UnsafeCollections.Benchmarks.*"
       - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Benchmark_Results
           path: ./BenchmarkDotNet.Artifacts/results/*
