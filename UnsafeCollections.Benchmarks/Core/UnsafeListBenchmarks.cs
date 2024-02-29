@@ -17,7 +17,7 @@ namespace UnsafeCollections.Benchmarks.Core;
 [MarkdownExporterAttribute.GitHub]
 public class UnsafeListBenchmarks
 {
-    [Params(0, 10, 100, 1000)]
+    [Params(0, 10, 100, 1000, 10000)]
     public int Capacity { get; set; }
 
 #region Initialisation Benchmarks
