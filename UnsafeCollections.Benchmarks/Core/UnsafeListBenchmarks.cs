@@ -3,7 +3,6 @@ using BenchmarkDotNet.Configs;
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnsafeCollections.Core;
 
@@ -11,10 +10,11 @@ namespace UnsafeCollections.Benchmarks.Core;
 
 [MinColumn]
 [MaxColumn]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[CategoriesColumn]
 [OperationsPerSecond]
 [MemoryDiagnoser]
 [MarkdownExporterAttribute.GitHub]
-[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 public class UnsafeListBenchmarks
 {
     [Params(0, 10, 100, 1000)]
@@ -59,17 +59,41 @@ public class UnsafeListBenchmarks
     private ArrayList _arrayList = null!;
     private int[] _array = null!;
 
-    [IterationSetup(Target = nameof(ForEach_UnsafeList))]
-    public void ForEach_UnsafeList_Setup()
+    [GlobalSetup(
+        Targets =
+        [
+            nameof(ForEach_UnsafeList), nameof(ForEach_Array), nameof(ForEach_ArrayList),
+            nameof(ForEach_NormalList)
+        ])]
+    public void ForEach_Setup()
     {
         _unsafeList = new UnsafeList(Capacity, typeof(int));
+        _array = new int[Capacity];
+        _arrayList = new ArrayList(Capacity);
+        _list = new List<int>(Capacity);
 
         for (var i = 0; i < Capacity; i++)
+        {
             _unsafeList.TryAdd(i, false);
+            _array[i] = i;
+            _arrayList.Add(i);
+            _list.Add(i);
+        }
     }
 
-    [IterationCleanup(Target = nameof(ForEach_UnsafeList))]
-    public void ForEach_UnsafeList_Cleanup() => _unsafeList.Dispose();
+    [GlobalCleanup(
+        Targets =
+        [
+            nameof(ForEach_UnsafeList), nameof(ForEach_Array), nameof(ForEach_ArrayList),
+            nameof(ForEach_NormalList)
+        ])]
+    public void ForEach_Cleanup()
+    {
+        _unsafeList.Dispose();
+        _array = null!;
+        _arrayList = null!;
+        _list = null!;
+    }
 
     [Benchmark(Baseline = true, Description = "UnsafeList")]
     [BenchmarkCategory("ForEach")]
@@ -80,12 +104,6 @@ public class UnsafeListBenchmarks
             var temp = item;
         }
     }
-    
-    [IterationSetup(Target = nameof(ForEach_Array))]
-    public void ForEach_Array_Setup() => _array = Enumerable.Range(0, Capacity).ToArray();
-
-    [IterationCleanup(Target = nameof(ForEach_Array))]
-    public void ForEach_Array_Cleanup() => _array = null!;
 
     [Benchmark(Description = "Array")]
     [BenchmarkCategory("ForEach")]
@@ -97,18 +115,6 @@ public class UnsafeListBenchmarks
         }
     }
 
-    [IterationSetup(Target = nameof(ForEach_ArrayList))]
-    public void ForEach_ArrayList_Setup()
-    {
-        _arrayList = new ArrayList(Capacity);
-        
-        for (var i = 0; i < Capacity; i++)
-            _arrayList.Add(i);
-    }
-
-    [IterationCleanup(Target = nameof(ForEach_ArrayList))]
-    public void ForEach_ArrayList_Cleanup() => _arrayList = null!;
-
     [Benchmark(Description = "ArrayList")]
     [BenchmarkCategory("ForEach")]
     public void ForEach_ArrayList()
@@ -118,12 +124,6 @@ public class UnsafeListBenchmarks
             var temp = item as int? ?? default;
         }
     }
-    
-    [IterationSetup(Target = nameof(ForEach_NormalList))]
-    public void ForEach_NormalList_Setup() => _list = Enumerable.Range(0, Capacity).ToList();
-
-    [IterationCleanup(Target = nameof(ForEach_NormalList))]
-    public void ForEach_NormalList_Cleanup() => _list = null!;
 
     [Benchmark(Description = "List")]
     [BenchmarkCategory("ForEach")]
