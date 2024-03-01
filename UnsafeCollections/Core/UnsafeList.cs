@@ -61,7 +61,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public static UnsafeList From<TUnmanaged>(in ReadOnlySpan<TUnmanaged> span)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (span.Length <= 0)
             return Empty<TUnmanaged>();
@@ -82,11 +82,11 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public static UnsafeList Empty<TUnmanaged>()
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged> =>
+        where TUnmanaged : unmanaged =>
         new(0, typeof(TUnmanaged));
 
     public readonly bool TryGet<TUnmanaged>(int index, out TUnmanaged value, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if ((checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle)) || (uint)index >= (uint)_count)
         {
@@ -104,7 +104,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public bool TryAdd<TUnmanaged>(in TUnmanaged item, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
@@ -128,7 +128,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public bool TryRemove<TUnmanaged>(in TUnmanaged item, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
@@ -171,7 +171,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public bool Contains<TUnmanaged>(in TUnmanaged item, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             return false;
@@ -189,7 +189,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public bool TryGetIndexOf<TUnmanaged>(in TUnmanaged item, out int index, bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
         {
@@ -223,7 +223,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public readonly Enumerator<TUnmanaged> AsEnumerator<TUnmanaged>(bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             throw new InvalidOperationException("Enumerator data type mismatch.");
@@ -235,7 +235,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public readonly PinnableReference<TUnmanaged> AsFixed<TUnmanaged>(bool checkType = true)
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         if (checkType && !typeof(TUnmanaged).TypeHandle.Equals(_typeHandle))
             throw new InvalidOperationException("Fixed pointer data type mismatch.");
@@ -313,7 +313,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public static bool operator !=(UnsafeList lhs, UnsafeList rhs) => !(lhs == rhs);
 
     public ref struct Enumerator<TUnmanaged>
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         private readonly unsafe TUnmanaged* _buffer;
         private readonly int _count;
@@ -359,7 +359,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     }
 
     public ref struct PinnableReference<TUnmanaged>
-        where TUnmanaged : unmanaged, IEquatable<TUnmanaged>
+        where TUnmanaged : unmanaged
     {
         private readonly unsafe TUnmanaged* _buffer;
         private readonly int _count;

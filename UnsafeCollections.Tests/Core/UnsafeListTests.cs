@@ -96,15 +96,15 @@ public class UnsafeListTests : BaseTests
     public void TryGet_IndexGreaterThanCapacity_ShouldReturnFalse(int capacity)
     {
         var additional = Random.Shared.Next(1, int.MaxValue - capacity);
-    
+
         _sut = new UnsafeList(capacity, typeof(int));
-    
+
         Assert.False(_sut.TryGet<float>(capacity + additional, out var invalid));
         Assert.Equal(default, invalid);
         Assert.False(_sut.TryGet<int>(capacity + additional, out var value));
         Assert.Equal(default, value);
     }
-    
+
     [Theory]
     [InlineData(new int[0])]
     [InlineData(new[] { 1, 2, 3, 4, 5 })]
@@ -118,7 +118,7 @@ public class UnsafeListTests : BaseTests
             Assert.Equal(array[i], item);
         }
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -131,7 +131,7 @@ public class UnsafeListTests : BaseTests
 
         for (var i = 0; i < capacity; i++)
             Assert.True(_sut.TryAdd(Random.Shared.Next()));
-    
+
         Assert.True(_sut.IsFull);
         Assert.True(_sut.TryAdd(Random.Shared.Next()));
     }
@@ -145,52 +145,52 @@ public class UnsafeListTests : BaseTests
     public void TryAdd_AddInvalidItemToUnsafeList_ShouldReturnFalse(int capacity)
     {
         _sut = new UnsafeList(capacity, typeof(int));
-        
+
         Assert.False(_sut.TryAdd(1.0f));
     }
-    
+
     [Fact]
     public void TryRemove_RemoveItemFromUnsafeList_ShouldReturnTrue()
     {
         _sut = new UnsafeList(0, typeof(int));
-        
+
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
-        
+
         Assert.True(_sut.TryAdd(value1));
         Assert.True(_sut.TryAdd(value2));
         Assert.True(_sut.TryRemove(value1));
         Assert.False(_sut.TryRemove(value1));
         Assert.False(_sut.TryRemove(1.0f));
     }
-    
+
     [Fact]
     public void TryRemoveAt_RemoveItemIndex2FromUnsafeList_ShouldReturnTrue()
     {
         _sut = new UnsafeList(0, typeof(int));
-        
+
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
-        
+
         Assert.True(_sut.TryAdd(value1));
         Assert.True(_sut.TryAdd(value2));
         Assert.True(_sut.TryRemoveAt(1));
         Assert.False(_sut.TryRemoveAt(1));
-        
+
         Assert.True(_sut.TryGet(0, out int item));
         Assert.Equal(value1, item);
     }
-    
+
     [Fact]
     public void Contains_UnsafeListCheckItems_ShouldReturnExpectedResult()
     {
         _sut = new UnsafeList(0, typeof(int));
-        
+
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
         var invalidValue1 = value1 - 1;
         var invalidValue2 = 1.0f;
-        
+
         Assert.True(_sut.TryAdd(value1));
         Assert.True(_sut.TryAdd(value2));
 
@@ -199,92 +199,92 @@ public class UnsafeListTests : BaseTests
         Assert.False(_sut.Contains(invalidValue1));
         Assert.False(_sut.Contains(invalidValue2));
     }
-    
+
     [Fact]
     public void TryGetIndexOf_GetIndicesOfItemsInUnsafeList_ShouldReturnCorrectIndex()
     {
         _sut = new UnsafeList(0, typeof(int));
-        
+
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
-        
+
         Assert.True(_sut.TryAdd(value1));
         Assert.True(_sut.TryAdd(value2));
         var invalidValue1 = value1 - 1;
         var invalidValue2 = 1.0f;
-        
+
         Assert.True(_sut.TryGetIndexOf(value1, out var index1));
         Assert.Equal(0, index1);
-        
+
         Assert.True(_sut.TryGetIndexOf(value2, out var index2));
         Assert.Equal(1, index2);
-        
+
         Assert.False(_sut.TryGetIndexOf(invalidValue1, out var invalidIndex1));
         Assert.Equal(-1, invalidIndex1);
-        
+
         Assert.False(_sut.TryGetIndexOf(invalidValue2, out var invalidIndex2));
         Assert.Equal(-1, invalidIndex2);
     }
-    
+
     [Fact]
     public void Clear_UnsafeListClearItems_ShouldReturnCount0()
     {
         _sut = new UnsafeList(0, typeof(int));
-        
+
         Assert.True(_sut.TryAdd(Random.Shared.Next()));
         Assert.True(_sut.TryAdd(Random.Shared.Next()));
-        
+
         Assert.False(_sut.IsEmpty);
-        
+
         _sut.Clear();
-        
+
         Assert.True(_sut.IsEmpty);
     }
-    
+
     [Theory]
     [InlineData(new int[0])]
     [InlineData(new[] { 1, 2, 3, 4, 5 })]
     public void GetEnumerator_ForeachLoop_ShouldGoThroughAllElementsInOrder(int[] array)
     {
         _sut = UnsafeList.From<int>(array);
-    
+
         var count = 0;
 
         Assert.Throws<InvalidOperationException>(() => _sut.AsEnumerator<float>());
-    
+
         foreach (var item in _sut.AsEnumerator<int>())
         {
             Assert.True(_sut.TryGet(count, out int value));
             Assert.Equal(value, item);
             count++;
         }
-    
+
         Assert.Equal(count, _sut.Count);
         Assert.Equal(count, _sut.Capacity);
     }
-    
+
     [Fact]
     public void GetPinnableReference_FixedBlockForUnsafeListWithItems_ShouldGetRefToFirstElement()
     {
         var array = new[] { 1, 2, 3, 4, 5 };
         _sut = UnsafeList.From<int>(array);
-    
+
         unsafe
         {
             Assert.Throws<InvalidOperationException>(() => _sut.AsFixed<float>());
-            
+
             fixed (int* pointer = _sut.AsFixed<int>())
             {
                 Assert.Equal(array[0], *pointer);
             }
         }
     }
-    
+
     [Fact]
     public void GetPinnableReference_FixedBlockForEmptyUnsafeList_ShouldReturnZeroPointer()
     {
         _sut = UnsafeList.Empty<int>();
-    
+
         unsafe
         {
             fixed (int* pointer = _sut.AsFixed<int>())
@@ -293,7 +293,7 @@ public class UnsafeListTests : BaseTests
             }
         }
     }
-    
+
     [Fact]
     public void GetPinnableReference_FixedBlockForVoidUnsafeList_ShouldThrow()
     {
@@ -301,27 +301,27 @@ public class UnsafeListTests : BaseTests
 
         Assert.Throws<InvalidOperationException>(() => _sut.AsFixed<int>());
     }
-    
+
     [Fact]
     public void Equality_UseEqualsAndOperatorsOnEmptyUnsafeList_ShouldReturnExpectedResults()
     {
         var array = Array.Empty<int>();
-        
+
         _sut = UnsafeList.From<int>(array);
         var tempList = UnsafeList.From<int>(array);
-    
+
         Assert.True(_sut == tempList);
         Assert.True(_sut.Equals(tempList));
-        
+
         var value = Random.Shared.Next();
         Assert.True(tempList.TryAdd(value));
-        
+
         Assert.True(_sut != tempList);
         Assert.False(_sut.Equals(tempList));
-        
+
         Assert.False(_sut.Equals(new object()));
     }
-    
+
     [Fact]
     public void Equality_UseEqualsAndOperatorsOnUnsafeListWithItems_ShouldReturnExpectedResults()
     {
@@ -329,19 +329,19 @@ public class UnsafeListTests : BaseTests
         
         _sut = UnsafeList.From<int>(array);
         var tempList = UnsafeList.From<int>(array);
-    
+
         Assert.False(_sut == tempList);
         Assert.False(_sut.Equals(tempList));
-        
+
         var value = Random.Shared.Next();
         Assert.True(tempList.TryAdd(value));
-        
+
         Assert.True(_sut != tempList);
         Assert.False(_sut.Equals(tempList));
-        
+
         Assert.False(_sut.Equals(new object()));
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -352,9 +352,9 @@ public class UnsafeListTests : BaseTests
     {
         _sut = new UnsafeList(capacity, typeof(int));
         _sut.TryAdd(Random.Shared.Next());
-    
+
         var toString = _sut.ToString();
-    
+
         Assert.Contains(nameof(UnsafeList), toString);
         Assert.Contains(nameof(Int32), toString);
         Assert.Contains(_sut.Count.ToString(), toString);
