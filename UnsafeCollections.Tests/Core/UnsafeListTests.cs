@@ -169,13 +169,15 @@ public class UnsafeListTests : BaseTests
     {
         _sut = new UnsafeList(0, typeof(int));
 
+        Assert.False(_sut.TryRemoveAt<int>(-124));
+        
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
 
         Assert.True(_sut.TryAdd(value1));
         Assert.True(_sut.TryAdd(value2));
-        Assert.True(_sut.TryRemoveAt(1));
-        Assert.False(_sut.TryRemoveAt(1));
+        Assert.True(_sut.TryRemoveAt<int>(1));
+        Assert.False(_sut.TryRemoveAt<int>(1));
 
         Assert.True(_sut.TryGet(0, out int item));
         Assert.Equal(value1, item);
@@ -201,7 +203,7 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void TryGetIndexOf_GetIndicesOfItemsInUnsafeList_ShouldReturnCorrectIndex()
+    public void IndexOf_GetIndicesOfItemsInUnsafeList_ShouldReturnCorrectIndex()
     {
         _sut = new UnsafeList(0, typeof(int));
 
@@ -213,17 +215,10 @@ public class UnsafeListTests : BaseTests
         var invalidValue1 = value1 - 1;
         var invalidValue2 = 1.0f;
 
-        Assert.True(_sut.TryGetIndexOf(value1, out var index1));
-        Assert.Equal(0, index1);
-
-        Assert.True(_sut.TryGetIndexOf(value2, out var index2));
-        Assert.Equal(1, index2);
-
-        Assert.False(_sut.TryGetIndexOf(invalidValue1, out var invalidIndex1));
-        Assert.Equal(-1, invalidIndex1);
-
-        Assert.False(_sut.TryGetIndexOf(invalidValue2, out var invalidIndex2));
-        Assert.Equal(-1, invalidIndex2);
+        Assert.Equal(0, _sut.IndexOf(value1));
+        Assert.Equal(1, _sut.IndexOf(value2));
+        Assert.Equal(-1, _sut.IndexOf(invalidValue1));
+        Assert.Equal(-1, _sut.IndexOf(invalidValue2));
     }
 
     [Fact]

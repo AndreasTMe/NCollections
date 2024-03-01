@@ -1,0 +1,22 @@
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+namespace UnsafeCollections.Helpers;
+
+[ExcludeFromCodeCoverage]
+internal static class ThrowHelpers
+{
+    [DoesNotReturn]
+    public static void ThrowInvalidOperationException(ExceptionKey key) =>
+        throw new InvalidOperationException(GetExceptionMessage(key));
+
+    internal static string? GetExceptionMessage(ExceptionKey key) =>
+        key switch
+        {
+            ExceptionKey.None                          => null,
+            ExceptionKey.EnumeratorTypeMismatch        => "Enumerator data type mismatch.",
+            ExceptionKey.PinnableReferenceTypeMismatch => "Fixed pointer data type mismatch.",
+            _                                          => throw new UnreachableException("This should never happen.")
+        };
+}
