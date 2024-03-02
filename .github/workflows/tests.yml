@@ -2,12 +2,19 @@ name: Tests
 
 on:
   push:
+    paths:
+      - 'UnsafeCollections/**/*.cs'
+      - 'UnsafeCollections/**/*.csproj'
+      - 'UnsafeCollections.Tests/**/*.cs'
+      - 'UnsafeCollections.Tests/**/*.csproj'
   pull_request:
     branches:
       - main
     paths:
-      - '**.cs'
-      - '**.csproj'
+      - 'UnsafeCollections/**/*.cs'
+      - 'UnsafeCollections/**/*.csproj'
+      - 'UnsafeCollections.Tests/**/*.cs'
+      - 'UnsafeCollections.Tests/**/*.csproj'
 
 env:
   DOTNET_VERSION: '8.0.x'

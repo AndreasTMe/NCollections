@@ -11,6 +11,7 @@ on:
         options:
           - All
           - Core.UnsafeListBenchmarks
+          - Generic.UnsafeListBenchmarks
 
 env:
   DOTNET_VERSION: '8.0.x'
