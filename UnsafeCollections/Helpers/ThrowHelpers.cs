@@ -8,7 +8,10 @@ namespace UnsafeCollections.Helpers;
 internal static class ThrowHelpers
 {
     [DoesNotReturn]
-    public static void ThrowInvalidOperationException(ExceptionKey key) =>
+    public static void IndexOutOfRangeException() => throw new IndexOutOfRangeException();
+
+    [DoesNotReturn]
+    public static void InvalidOperationException(ExceptionKey key) =>
         throw new InvalidOperationException(GetExceptionMessage(key));
 
     internal static string? GetExceptionMessage(ExceptionKey key) =>

@@ -1,11 +1,6 @@
 name: Build and Run Benchmarks
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
   workflow_dispatch:
     inputs:
       selected_benchmarks:
@@ -17,22 +12,26 @@ on:
           - All
           - Core.UnsafeListBenchmarks
 
+env:
+  DOTNET_VERSION: '8.0.x'
+  
 jobs:
   build_and_run_benchmarks:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    name: build-and-run-benchmarks
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Restore Dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore -c Release
+        run: dotnet build --configuration Release --no-restore
       - name: Publish
-        run: dotnet publish -c Release --verbosity normal -o ./publish/
+        run: dotnet publish --configuration Release --verbosity normal -o ./publish/
       - name: Run All Benchmarks
         if: ${{ github.event.inputs.selected_benchmarks == 'All' }}
         run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f *

@@ -30,8 +30,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public readonly bool IsEmpty => _count == 0;
 
     public readonly bool IsFull => _count == _capacity;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public UnsafeList()
     {
         unsafe
@@ -42,8 +41,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         _typeHandle = default;
         _capacity = _count = 0;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public UnsafeList(int capacity, Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
@@ -69,10 +67,10 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public static UnsafeList From<TUnmanaged>(in ReadOnlySpan<TUnmanaged> span)
         where TUnmanaged : unmanaged
     {
-        if (span.Length <= 0)
-            return Empty<TUnmanaged>();
-
         var list = new UnsafeList(span.Length, typeof(TUnmanaged));
+
+        if (span.Length <= 0)
+            return list;
 
         unsafe
         {
@@ -86,10 +84,6 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
 
         return list;
     }
-
-    public static UnsafeList Empty<TUnmanaged>()
-        where TUnmanaged : unmanaged =>
-        new(0, typeof(TUnmanaged));
 
     public readonly bool TryGet<TUnmanaged>(int index, out TUnmanaged value, bool checkType = true)
         where TUnmanaged : unmanaged
@@ -197,7 +191,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
     public int IndexOf<TUnmanaged>(in TUnmanaged item, bool checkType = true)
         where TUnmanaged : unmanaged
     {
-        if (checkType && !IsOfType<TUnmanaged>())
+        if ((checkType && !IsOfType<TUnmanaged>()) || _count == 0)
             return -1;
 
         // TODO: Check for bitwise equality
@@ -219,7 +213,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         where TUnmanaged : unmanaged
     {
         if (checkType && !IsOfType<TUnmanaged>())
-            ThrowHelpers.ThrowInvalidOperationException(ExceptionKey.EnumeratorTypeMismatch);
+            ThrowHelpers.InvalidOperationException(ExceptionKey.EnumeratorTypeMismatch);
 
         unsafe
         {
@@ -231,7 +225,7 @@ public struct UnsafeList : IEquatable<UnsafeList>, IDisposable
         where TUnmanaged : unmanaged
     {
         if (checkType && !IsOfType<TUnmanaged>())
-            ThrowHelpers.ThrowInvalidOperationException(ExceptionKey.PinnableReferenceTypeMismatch);
+            ThrowHelpers.InvalidOperationException(ExceptionKey.PinnableReferenceTypeMismatch);
 
         unsafe
         {

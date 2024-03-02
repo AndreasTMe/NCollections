@@ -43,9 +43,7 @@ public class UnsafeListTests : BaseTests
 
         if (capacity <= 0)
         {
-            Assert.True(_sut.Equals(UnsafeList.Empty<int>()));
             Assert.False(_sut.Equals(UnsafeList.Void));
-            Assert.False(_sut.Equals(UnsafeList.Empty<float>()));
         }
         else
         {
@@ -278,7 +276,7 @@ public class UnsafeListTests : BaseTests
     [Fact]
     public void GetPinnableReference_FixedBlockForEmptyUnsafeList_ShouldReturnZeroPointer()
     {
-        _sut = UnsafeList.Empty<int>();
+        _sut = new UnsafeList(0, typeof(int));
 
         unsafe
         {
