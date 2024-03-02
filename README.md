@@ -1,15 +1,22 @@
 # UnsafeCollections
 
+[![Tests](https://github.com/andreastdev/UnsafeCollections/actions/workflows/tests.yml/badge.svg)](https://github.com/andreastdev/UnsafeCollections/actions/workflows/tests.yml)
+
 This is a repository where I am experimenting with unsafe code in C#. I'm trying to also write benchmarks to compare the
 performance of the unsafe code with the already existing code. All collections are struct wrappers around a pointer to a
 memory block in native memory, so they can only store `unmanaged` types.
 
+### Table of Contents
+
+- [UnsafeList](#unsafelist)
+- [UnsafeList\<T>](#unsafelistt)
+
 ## UnsafeList
 
-### Introduction
+### Description
 
-The first thing I've implemented is an `UnsafeList` struct. It is a very simple implementation, but it is already faster
-than the `List<T>` class in some scenarios. It is also not generic, which makes it a lot more unsafe to use. It's more
+A non generic version of a `List<T>`. It looks a lot like an `ArrayList` but has generic methods to retrieve the stored
+data. Generics are extremely useful, but having generics used all over the place can sometimes be a hindrance. It's more
 like a "Trust me, I know what I'm doing" kind of collection.
 
 ### Why use it?
@@ -80,3 +87,36 @@ public void DataStorage_AddItemsToDataStorage_ShouldBeAbleToRetrieveItems()
 ```
 
 Find some `UnsafeList` benchmarks [here](./.docs/unsafe-list.md).
+
+## UnsafeList\<T>
+
+### Description
+
+Similar to a `List<T>`. It's a collection that can store a variable number of elements in a contiguous block of native
+memory.
+
+### Why use it?
+
+Well, normally you wouldn't. The `List<T>` is a very good collection and it's very rare that you would need to use an
+unsafe version of it. However, if you are iterating a lot of data and you are trying to optimize your code, you might
+want to consider using this collection.
+
+```csharp
+public struct Position
+{
+    public float X;
+    public float Y;
+    public float Z;
+}
+
+public class PositionReader
+{
+    public void Read(in UnsafeList<Position> positions)
+    {
+        foreach (var position in positions)
+        {
+            // Do something with the position
+        }
+    }
+}
+```
