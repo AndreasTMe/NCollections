@@ -6,6 +6,18 @@ This is a repository where I am experimenting with unsafe code in C#. I'm trying
 performance of the unsafe code with the already existing code. All collections are struct wrappers around a pointer to a
 memory block in native memory, so they can only store `unmanaged` types.
 
+#### Pros
+
+- No GC pressure
+- Equal or better performance than the standard collections (_`IndexOf` method will be improved with bitwise
+  comparisons_)
+
+#### Cons
+
+- Need to be disposed manually
+- Only for `unmanaged` types
+- ...and probably more, but who cares? This is just for fun. :)
+
 ### Table of Contents
 
 - [UnsafeList](#unsafelist)
@@ -18,6 +30,8 @@ memory block in native memory, so they can only store `unmanaged` types.
 A non generic version of a `List<T>`. It looks a lot like an `ArrayList` but has generic methods to retrieve the stored
 data. Generics are extremely useful, but having generics used all over the place can sometimes be a hindrance. It's more
 like a "Trust me, I know what I'm doing" kind of collection.
+
+_Find some `UnsafeList` benchmarks [here](./.docs/unsafe-list.md)._
 
 ### Why use it?
 
@@ -86,7 +100,7 @@ public void DataStorage_AddItemsToDataStorage_ShouldBeAbleToRetrieveItems()
 }
 ```
 
-Find some `UnsafeList` benchmarks [here](./.docs/unsafe-list.md).
+---
 
 ## UnsafeList\<T>
 
@@ -94,6 +108,8 @@ Find some `UnsafeList` benchmarks [here](./.docs/unsafe-list.md).
 
 Similar to a `List<T>`. It's a collection that can store a variable number of elements in a contiguous block of native
 memory.
+
+_Find some `UnsafeList<T>` benchmarks [here](./.docs/unsafe-list-generic.md)._
 
 ### Why use it?
 
