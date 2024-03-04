@@ -26,7 +26,7 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
 
     public readonly bool IsEmpty => _count == 0;
 
-    public readonly bool IsFull => _capacity == _count;
+    public readonly bool IsFull => _capacity > 0 && _capacity == _count;
 
     public NativeList()
     {
@@ -165,7 +165,7 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
     {
         if ((uint)index >= (uint)_count)
             return false;
-        
+
         unsafe
         {
             Unsafe.CopyBlock(
@@ -183,7 +183,7 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
 
     public int IndexOf(in TUnmanaged item)
     {
-        if (_count == 0)
+        if (_count <= 0)
             return -1;
 
         // TODO: Check for bitwise equality
@@ -200,7 +200,21 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
         if (_count > 0)
             _count = 0;
     }
-    
+
+    public NativeReadOnlyCollection<TUnmanaged> AsReadOnly()
+    {
+        NativeReadOnlyCollection<TUnmanaged> result;
+
+        unsafe
+        {
+            result = new NativeReadOnlyCollection<TUnmanaged>(_buffer, _count);
+        }
+
+        Dispose();
+
+        return result;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly NativeEnumerator<TUnmanaged> AsEnumerator()
     {

@@ -30,7 +30,7 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
 
     public readonly bool IsEmpty => _count == 0;
 
-    public readonly bool IsFull => _count == _capacity;
+    public readonly bool IsFull => _capacity > 0 && _count == _capacity;
     
     public NativeList()
     {
@@ -192,7 +192,7 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
     public int IndexOf<TUnmanaged>(in TUnmanaged item, bool checkType = true)
         where TUnmanaged : unmanaged
     {
-        if ((checkType && !IsOfType<TUnmanaged>()) || _count == 0)
+        if ((checkType && !IsOfType<TUnmanaged>()) || _count <= 0)
             return -1;
 
         // TODO: Check for bitwise equality
