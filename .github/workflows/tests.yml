@@ -3,18 +3,18 @@ name: Tests
 on:
     push:
         paths:
-            - "NCollections/**/*.cs"
-            - "NCollections/**/*.csproj"
-            - "NCollections.Tests/**/*.cs"
-            - "NCollections.Tests/**/*.csproj"
+            - "src/NCollections/**/*.cs"
+            - "src/NCollections/**/*.csproj"
+            - "tests/NCollections.Tests/**/*.cs"
+            - "tests/NCollections.Tests/**/*.csproj"
     pull_request:
         branches:
             - main
         paths:
-            - "NCollections/**/*.cs"
-            - "NCollections/**/*.csproj"
-            - "NCollections.Tests/**/*.cs"
-            - "NCollections.Tests/**/*.csproj"
+            - "src/NCollections/**/*.cs"
+            - "src/NCollections/**/*.csproj"
+            - "tests/NCollections.Tests/**/*.cs"
+            - "tests/NCollections.Tests/**/*.csproj"
 
 env:
     DOTNET_VERSION: "8.0.x"

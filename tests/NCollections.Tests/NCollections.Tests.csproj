@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NCollections\NCollections.csproj" />
+      <ProjectReference Include="..\..\src\NCollections\NCollections.csproj" />
     </ItemGroup>
 
 </Project>
