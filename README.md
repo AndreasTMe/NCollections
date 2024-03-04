@@ -1,6 +1,6 @@
-# UnsafeCollections
+# Native Collections
 
-[![Tests](https://github.com/andreastdev/UnsafeCollections/actions/workflows/tests.yml/badge.svg)](https://github.com/andreastdev/UnsafeCollections/actions/workflows/tests.yml)
+[![Tests](https://github.com/andreastdev/NCollections/actions/workflows/tests.yml/badge.svg)](https://github.com/andreastdev/NCollections/actions/workflows/tests.yml)
 
 This is a repository where I am experimenting with unsafe code in C#. I'm trying to also write benchmarks to compare the
 performance of the unsafe code with the already existing code. All collections are struct wrappers around a pointer to a
@@ -8,22 +8,22 @@ memory block in native memory, so they can only store `unmanaged` types.
 
 #### Pros
 
-- No GC pressure
-- Equal or better performance than the standard collections (_`IndexOf` method will be improved with bitwise
-  comparisons_)
+-   No GC pressure
+-   Equal or better performance than the standard collections (_`IndexOf` method will be improved with bitwise
+    comparisons_)
 
 #### Cons
 
-- Need to be disposed manually
-- Only for `unmanaged` types
-- ...and probably more, but who cares? This is just for fun. :)
+-   Need to be disposed manually
+-   Only for `unmanaged` types
+-   ...and probably more, but who cares? This is just for fun. :)
 
 ### Table of Contents
 
-- [UnsafeList](#unsafelist)
-- [UnsafeList\<T>](#unsafelistt)
+-   [NativeList](#nativelist)
+-   [NativeList\<T>](#nativelistt)
 
-## UnsafeList
+## NativeList
 
 ### Description
 
@@ -31,30 +31,30 @@ A non generic version of a `List<T>`. It looks a lot like an `ArrayList` but has
 data. Generics are extremely useful, but having generics used all over the place can sometimes be a hindrance. It's more
 like a "Trust me, I know what I'm doing" kind of collection.
 
-_Find some `UnsafeList` benchmarks [here](./.docs/unsafe-list.md)._
+_Find some `NativeList` benchmarks [here](./.docs/native-list.md)._
 
 ### Why use it?
 
 The motivation for a collection like this was experimenting with an Archetype-based Entity-Component System in C++.
-The `UnsafeList` class makes way more sense there but could be used in very niche scenarios. For example, if you are
+The `NativeList` class makes way more sense there but could be used in very niche scenarios. For example, if you are
 storing collections of data and you only care about their types when you are iterating/reading their data:
 
 ```csharp
 public class DataStorage : IDisposable
 {
-    private readonly Dictionary<Type, UnsafeList> _data = new();
+    private readonly Dictionary<Type, NativeList> _data = new();
 
     public void Add<T>(T value)
         where T : unmanaged
     {
         if (!_data.TryGetValue(typeof(T), out var list))
-            list = new UnsafeList(0, typeof(T));
+            list = new NativeList(0, typeof(T));
 
         list.TryAdd(value);
         _data[typeof(T)] = list;
     }
 
-    public bool TryGet<T>(out UnsafeList list)
+    public bool TryGet<T>(out NativeList list)
         where T : unmanaged =>
         _data.TryGetValue(typeof(T), out list);
 
@@ -89,11 +89,11 @@ public void DataStorage_AddItemsToDataStorage_ShouldBeAbleToRetrieveItems()
         count++;
     }
     Assert.Equal(integers.Length, count);
-    
+
     Assert.True(storage.TryGet<float>(out var floatList));
     Assert.True(floatList.TryGet(0, out float item3));
     Assert.Equal(value3, item3);
-    
+
     Assert.True(storage.TryGet<bool>(out var boolList));
     Assert.True(boolList.TryGet(0, out bool item4));
     Assert.Equal(value4, item4);
@@ -102,14 +102,14 @@ public void DataStorage_AddItemsToDataStorage_ShouldBeAbleToRetrieveItems()
 
 ---
 
-## UnsafeList\<T>
+## NativeList\<T>
 
 ### Description
 
 Similar to a `List<T>`. It's a collection that can store a variable number of elements in a contiguous block of native
 memory.
 
-_Find some `UnsafeList<T>` benchmarks [here](./.docs/unsafe-list-generic.md)._
+_Find some `NativeList<T>` benchmarks [here](./.docs/native-list-generic.md)._
 
 ### Why use it?
 
@@ -127,7 +127,7 @@ public struct Position
 
 public class PositionReader
 {
-    public void Read(in UnsafeList<Position> positions)
+    public void Read(in NativeList<Position> positions)
     {
         foreach (var position in positions)
         {

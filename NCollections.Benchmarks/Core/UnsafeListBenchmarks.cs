@@ -1,13 +1,13 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 
+using NCollections.Core;
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using UnsafeCollections.Core;
-
-namespace UnsafeCollections.Benchmarks.Core;
+namespace NCollections.Benchmarks.Core;
 
 [MinColumn]
 [MaxColumn]
@@ -16,7 +16,7 @@ namespace UnsafeCollections.Benchmarks.Core;
 [OperationsPerSecond]
 [MemoryDiagnoser]
 [MarkdownExporterAttribute.GitHub]
-public class UnsafeListBenchmarks
+public class NativeListBenchmarks
 {
     private const string InitialisationCategory = "1. Initialisation";
     private const string ForLoopCategory = "2. For Loop";
@@ -25,7 +25,7 @@ public class UnsafeListBenchmarks
     private const string AddCategory = "5. Add";
     private const string RemoveCategory = "6. Remove";
 
-    private UnsafeList _unsafeList;
+    private NativeList _unsafeList;
     private List<int> _list = null!;
     private ArrayList _arrayList = null!;
     private int[] _array = null!;
@@ -36,7 +36,7 @@ public class UnsafeListBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _unsafeList = new UnsafeList(Capacity, typeof(int));
+        _unsafeList = new NativeList(Capacity, typeof(int));
         _array = new int[Capacity];
         _arrayList = new ArrayList(Capacity);
         _list = new List<int>(Capacity);
@@ -61,11 +61,11 @@ public class UnsafeListBenchmarks
 
 #region Initialisation Benchmarks
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(InitialisationCategory)]
-    public void Initialisation_UnsafeListWithCapacity()
+    public void Initialisation_NativeListWithCapacity()
     {
-        using var list = new UnsafeList(Capacity, typeof(int));
+        using var list = new NativeList(Capacity, typeof(int));
     }
 
     [Benchmark(Description = "Array")]
@@ -93,9 +93,9 @@ public class UnsafeListBenchmarks
 
 #region Loop Benchmarks
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(ForLoopCategory)]
-    public void For_UnsafeList()
+    public void For_NativeList()
     {
         for (var i = 0; i < _unsafeList.Count; i++)
         {
@@ -103,9 +103,9 @@ public class UnsafeListBenchmarks
         }
     }
 
-    [Benchmark(Description = "UnsafeList")]
+    [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(ForLoopCategory)]
-    public void For_UnsafeList_NoTypeCheck()
+    public void For_NativeList_NoTypeCheck()
     {
         for (var i = 0; i < _unsafeList.Count; i++)
         {
@@ -143,9 +143,9 @@ public class UnsafeListBenchmarks
         }
     }
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(ForEachLoopCategory)]
-    public void ForEach_UnsafeList()
+    public void ForEach_NativeList()
     {
         foreach (var item in _unsafeList.AsEnumerator<int>())
         {
@@ -153,9 +153,9 @@ public class UnsafeListBenchmarks
         }
     }
 
-    [Benchmark(Description = "UnsafeList")]
+    [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(ForEachLoopCategory)]
-    public void ForEach_UnsafeList_NoTypeCheck()
+    public void ForEach_NativeList_NoTypeCheck()
     {
         foreach (var item in _unsafeList.AsEnumerator<int>(false))
         {
@@ -197,16 +197,16 @@ public class UnsafeListBenchmarks
 
 #region Contains Benchmarks
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(ContainsCategory)]
-    public void Contains_UnsafeList()
+    public void Contains_NativeList()
     {
         var contains = _unsafeList.Contains<int>(Capacity / 2);
     }
 
-    [Benchmark(Description = "UnsafeList")]
+    [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(ContainsCategory)]
-    public void Contains_UnsafeList_NoTypeCheck()
+    public void Contains_NativeList_NoTypeCheck()
     {
         var contains = _unsafeList.Contains<int>(Capacity / 2, false);
     }
@@ -236,11 +236,11 @@ public class UnsafeListBenchmarks
     
 #region Add Benchmarks
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(AddCategory)]
-    public void Add_UnsafeList()
+    public void Add_NativeList()
     {
-        using var list = new UnsafeList(0, typeof(int));
+        using var list = new NativeList(0, typeof(int));
         
         for (var i = 0; i < Capacity; i++)
         {
@@ -248,11 +248,11 @@ public class UnsafeListBenchmarks
         }
     }
     
-    [Benchmark(Description = "UnsafeList")]
+    [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(AddCategory)]
-    public void Add_UnsafeList_NoTypeCheck()
+    public void Add_NativeList_NoTypeCheck()
     {
-        using var list = new UnsafeList(0, typeof(int));
+        using var list = new NativeList(0, typeof(int));
         
         for (var i = 0; i < Capacity; i++)
         {
@@ -288,16 +288,16 @@ public class UnsafeListBenchmarks
     
 #region Remove Benchmarks
 
-    [Benchmark(Baseline = true, Description = "UnsafeList")]
+    [Benchmark(Baseline = true, Description = "NativeList")]
     [BenchmarkCategory(RemoveCategory)]
-    public void Remove_UnsafeList()
+    public void Remove_NativeList()
     {
         _unsafeList.TryRemove<int>(Capacity / 2);
     }
 
-    [Benchmark(Description = "UnsafeList")]
+    [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(RemoveCategory)]
-    public void Remove_UnsafeList_NoTypeCheck()
+    public void Remove_NativeList_NoTypeCheck()
     {
         _unsafeList.TryRemove<int>(Capacity / 2, false);
     }

@@ -1,4 +1,4 @@
-namespace UnsafeCollections.Helpers;
+namespace NCollections.Helpers;
 
 internal enum ExceptionKey
 {

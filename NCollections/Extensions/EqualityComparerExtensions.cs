@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace UnsafeCollections.Extensions;
+namespace NCollections.Extensions;
 
 internal static class EqualityComparerExtensions
 {

@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace UnsafeCollections.Helpers;
+namespace NCollections.Helpers;
 
 [ExcludeFromCodeCoverage]
 internal static class ThrowHelpers

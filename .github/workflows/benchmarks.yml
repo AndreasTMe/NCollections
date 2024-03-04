@@ -1,46 +1,46 @@
 name: Benchmarks
 
 on:
-  workflow_dispatch:
-    inputs:
-      selected_benchmarks:
-        description: 'The benchmarks to run'
-        required: true
-        default: 'All'
-        type: choice
-        options:
-          - All
-          - Core.UnsafeListBenchmarks
-          - Generic.UnsafeListBenchmarks
+    workflow_dispatch:
+        inputs:
+            selected_benchmarks:
+                description: "The benchmarks to run"
+                required: true
+                default: "All"
+                type: choice
+                options:
+                    - All
+                    - Core.NativeListBenchmarks
+                    - Generic.NativeListBenchmarks
 
 env:
-  DOTNET_VERSION: '8.0.x'
-  
-jobs:
-  build_and_run_benchmarks:
-    name: build-and-run-benchmarks
-    runs-on: ubuntu-latest
+    DOTNET_VERSION: "8.0.x"
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Restore Dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-      - name: Publish
-        run: dotnet publish --configuration Release --verbosity normal -o ./publish/
-      - name: Run All Benchmarks
-        if: ${{ github.event.inputs.selected_benchmarks == 'All' }}
-        run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f *
-      - name: Run Selected Benchmarks
-        if: ${{ github.event.inputs.selected_benchmarks != 'All' }}
-        run: dotnet "./publish/UnsafeCollections.Benchmarks.dll" -f "UnsafeCollections.Benchmarks.${{ github.event.inputs.selected_benchmarks }}"
-      - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: UnsafeCollections.BenchmarkResults
-          path: ./BenchmarkDotNet.Artifacts/results/*.md
+jobs:
+    build_and_run_benchmarks:
+        name: build-and-run-benchmarks
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+            - name: Restore Dependencies
+              run: dotnet restore
+            - name: Build
+              run: dotnet build --configuration Release --no-restore
+            - name: Publish
+              run: dotnet publish --configuration Release --verbosity normal -o ./publish/
+            - name: Run All Benchmarks
+              if: ${{ github.event.inputs.selected_benchmarks == 'All' }}
+              run: dotnet "./publish/NCollections.Benchmarks.dll" -f *
+            - name: Run Selected Benchmarks
+              if: ${{ github.event.inputs.selected_benchmarks != 'All' }}
+              run: dotnet "./publish/NCollections.Benchmarks.dll" -f "NCollections.Benchmarks.${{ github.event.inputs.selected_benchmarks }}"
+            - name: Upload Benchmark Results
+              uses: actions/upload-artifact@v4
+              with:
+                  name: NCollections.BenchmarkResults
+                  path: ./BenchmarkDotNet.Artifacts/results/*.md

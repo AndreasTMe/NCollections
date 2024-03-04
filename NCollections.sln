@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsafeCollections", "UnsafeCollections\UnsafeCollections.csproj", "{11CB7BE8-0664-4C53-A307-15986384563A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCollections", "NCollections\NCollections.csproj", "{11CB7BE8-0664-4C53-A307-15986384563A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsafeCollections.Benchmarks", "UnsafeCollections.Benchmarks\UnsafeCollections.Benchmarks.csproj", "{95F85D06-1445-4DC4-A114-37CB69077D16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCollections.Benchmarks", "NCollections.Benchmarks\NCollections.Benchmarks.csproj", "{95F85D06-1445-4DC4-A114-37CB69077D16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsafeCollections.Tests", "UnsafeCollections.Tests\UnsafeCollections.Tests.csproj", "{4A666C92-AE96-483B-8934-772C2911F829}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCollections.Tests", "NCollections.Tests\NCollections.Tests.csproj", "{4A666C92-AE96-483B-8934-772C2911F829}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

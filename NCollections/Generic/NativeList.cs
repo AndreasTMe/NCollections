@@ -1,15 +1,15 @@
+using NCollections.Extensions;
+using NCollections.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-using UnsafeCollections.Extensions;
-using UnsafeCollections.Helpers;
-
-namespace UnsafeCollections.Generic;
+namespace NCollections.Generic;
 
 [StructLayout(LayoutKind.Sequential)]
-public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisposable
+public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisposable
     where TUnmanaged : unmanaged
 {
     private const int InitialCapacity = 4;
@@ -18,7 +18,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
     private int _capacity;
     private int _count;
 
-    public static UnsafeList<TUnmanaged> Empty { get; } = new();
+    public static NativeList<TUnmanaged> Empty { get; } = new();
 
     public readonly int Capacity => _capacity;
 
@@ -28,7 +28,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
 
     public readonly bool IsFull => _capacity == _count;
 
-    public UnsafeList()
+    public NativeList()
     {
         unsafe
         {
@@ -38,7 +38,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
         _capacity = _count = 0;
     }
 
-    public UnsafeList(int capacity)
+    public NativeList(int capacity)
     {
         if (capacity <= 0)
         {
@@ -56,7 +56,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
         _count = 0;
     }
 
-    public UnsafeList(in ReadOnlySpan<TUnmanaged> span)
+    public NativeList(in ReadOnlySpan<TUnmanaged> span)
     {
         if (span.Length == 0)
         {
@@ -234,7 +234,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
         }
     }
 
-    public bool Equals(UnsafeList<TUnmanaged> other)
+    public bool Equals(NativeList<TUnmanaged> other)
     {
         unsafe
         {
@@ -245,7 +245,7 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
         }
     }
 
-    public override bool Equals(object? obj) => obj is UnsafeList<TUnmanaged> other && Equals(other);
+    public override bool Equals(object? obj) => obj is NativeList<TUnmanaged> other && Equals(other);
 
     public override int GetHashCode()
     {
@@ -257,8 +257,8 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
             var hash = hashingBase;
 
             hash = (hash * hashingMultiplier)
-                ^ (!ReferenceEquals(null, typeof(UnsafeList<TUnmanaged>))
-                    ? typeof(UnsafeList<TUnmanaged>).GetHashCode()
+                ^ (!ReferenceEquals(null, typeof(NativeList<TUnmanaged>))
+                    ? typeof(NativeList<TUnmanaged>).GetHashCode()
                     : 0);
 
             hash = (hash * hashingMultiplier)
@@ -277,11 +277,11 @@ public struct UnsafeList<TUnmanaged> : IEquatable<UnsafeList<TUnmanaged>>, IDisp
     }
 
     public readonly override string ToString() =>
-        $"{nameof(UnsafeList<TUnmanaged>)}<{typeof(TUnmanaged).Name}>[Count: {_count} | Capacity: {_capacity}]";
+        $"{nameof(NativeList<TUnmanaged>)}<{typeof(TUnmanaged).Name}>[Count: {_count} | Capacity: {_capacity}]";
 
-    public static bool operator ==(UnsafeList<TUnmanaged> lhs, UnsafeList<TUnmanaged> rhs) => lhs.Equals(rhs);
+    public static bool operator ==(NativeList<TUnmanaged> lhs, NativeList<TUnmanaged> rhs) => lhs.Equals(rhs);
 
-    public static bool operator !=(UnsafeList<TUnmanaged> lhs, UnsafeList<TUnmanaged> rhs) => !(lhs == rhs);
+    public static bool operator !=(NativeList<TUnmanaged> lhs, NativeList<TUnmanaged> rhs) => !(lhs == rhs);
     
     public ref struct Enumerator
     {

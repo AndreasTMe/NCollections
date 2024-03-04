@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 using Xunit.Abstractions;
 
-namespace UnsafeCollections.Tests;
+namespace NCollections.Tests;
 
 public class BaseTests : IDisposable
 {

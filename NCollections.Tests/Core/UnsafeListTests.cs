@@ -1,17 +1,17 @@
-using UnsafeCollections.Core;
+using NCollections.Core;
 
 using System;
 
 using Xunit;
 using Xunit.Abstractions;
 
-namespace UnsafeCollections.Tests.Core;
+namespace NCollections.Tests.Core;
 
-public class UnsafeListTests : BaseTests
+public class NativeListTests : BaseTests
 {
-    private UnsafeList _sut;
+    private NativeList _sut;
 
-    public UnsafeListTests(ITestOutputHelper output) : base(output) { }
+    public NativeListTests(ITestOutputHelper output) : base(output) { }
 
     public override void Dispose()
     {
@@ -25,9 +25,9 @@ public class UnsafeListTests : BaseTests
     [Fact]
     public void Constructor_InitialiseDefault_ShouldBeVoid()
     {
-        _sut = new UnsafeList();
+        _sut = new NativeList();
 
-        Assert.Equal(UnsafeList.Void, _sut);
+        Assert.Equal(NativeList.Void, _sut);
     }
 
     [Theory]
@@ -39,11 +39,11 @@ public class UnsafeListTests : BaseTests
     [InlineData(1000)]
     public void Constructor_InitialiseWithCapacity_ShouldBeEmpty(int capacity)
     {
-        _sut = new UnsafeList(capacity, typeof(int));
+        _sut = new NativeList(capacity, typeof(int));
 
         if (capacity <= 0)
         {
-            Assert.False(_sut.Equals(UnsafeList.Void));
+            Assert.False(_sut.Equals(NativeList.Void));
         }
         else
         {
@@ -59,9 +59,9 @@ public class UnsafeListTests : BaseTests
     [InlineData(null)]
     [InlineData(new int[0])]
     [InlineData(new[] { 1, 2, 3, 4, 5 })]
-    public void Constructor_InitialiseFromArray_ShouldBeAbleToCreateUnsafeList(int[]? array)
+    public void Constructor_InitialiseFromArray_ShouldBeAbleToCreateNativeList(int[]? array)
     {
-        _sut = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
 
         if (array is null)
         {
@@ -95,7 +95,7 @@ public class UnsafeListTests : BaseTests
     {
         var additional = Random.Shared.Next(1, int.MaxValue - capacity);
 
-        _sut = new UnsafeList(capacity, typeof(int));
+        _sut = new NativeList(capacity, typeof(int));
 
         Assert.False(_sut.TryGet<float>(capacity + additional, out var invalid));
         Assert.Equal(default, invalid);
@@ -108,7 +108,7 @@ public class UnsafeListTests : BaseTests
     [InlineData(new[] { 1, 2, 3, 4, 5 })]
     public void TryGet_InitialiseFromArray_ShouldMatchArray(int[] array)
     {
-        _sut = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
 
         for (var i = 0; i < array.Length; i++)
         {
@@ -123,9 +123,9 @@ public class UnsafeListTests : BaseTests
     [InlineData(10)]
     [InlineData(100)]
     [InlineData(1000)]
-    public void TryAdd_AddItemToUnsafeList_ShouldReturnTrue(int capacity)
+    public void TryAdd_AddItemToNativeList_ShouldReturnTrue(int capacity)
     {
-        _sut = new UnsafeList(capacity, typeof(int));
+        _sut = new NativeList(capacity, typeof(int));
 
         for (var i = 0; i < capacity; i++)
             Assert.True(_sut.TryAdd(Random.Shared.Next()));
@@ -140,17 +140,17 @@ public class UnsafeListTests : BaseTests
     [InlineData(10)]
     [InlineData(100)]
     [InlineData(1000)]
-    public void TryAdd_AddInvalidItemToUnsafeList_ShouldReturnFalse(int capacity)
+    public void TryAdd_AddInvalidItemToNativeList_ShouldReturnFalse(int capacity)
     {
-        _sut = new UnsafeList(capacity, typeof(int));
+        _sut = new NativeList(capacity, typeof(int));
 
         Assert.False(_sut.TryAdd(1.0f));
     }
 
     [Fact]
-    public void TryRemove_RemoveItemFromUnsafeList_ShouldReturnTrue()
+    public void TryRemove_RemoveItemFromNativeList_ShouldReturnTrue()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
@@ -163,9 +163,9 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void TryRemoveAt_RemoveItemIndex2FromUnsafeList_ShouldReturnTrue()
+    public void TryRemoveAt_RemoveItemIndex2FromNativeList_ShouldReturnTrue()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         Assert.False(_sut.TryRemoveAt<int>(-124));
         
@@ -182,9 +182,9 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void Contains_UnsafeListCheckItems_ShouldReturnExpectedResult()
+    public void Contains_NativeListCheckItems_ShouldReturnExpectedResult()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
@@ -201,9 +201,9 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void IndexOf_GetIndicesOfItemsInUnsafeList_ShouldReturnCorrectIndex()
+    public void IndexOf_GetIndicesOfItemsInNativeList_ShouldReturnCorrectIndex()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         var value1 = Random.Shared.Next();
         var value2 = value1 + 1;
@@ -220,9 +220,9 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void Clear_UnsafeListClearItems_ShouldReturnCount0()
+    public void Clear_NativeListClearItems_ShouldReturnCount0()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         Assert.True(_sut.TryAdd(Random.Shared.Next()));
         Assert.True(_sut.TryAdd(Random.Shared.Next()));
@@ -239,7 +239,7 @@ public class UnsafeListTests : BaseTests
     [InlineData(new[] { 1, 2, 3, 4, 5 })]
     public void GetEnumerator_ForeachLoop_ShouldGoThroughAllElementsInOrder(int[] array)
     {
-        _sut = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
 
         var count = 0;
 
@@ -257,10 +257,10 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void GetPinnableReference_FixedBlockForUnsafeListWithItems_ShouldGetRefToFirstElement()
+    public void GetPinnableReference_FixedBlockForNativeListWithItems_ShouldGetRefToFirstElement()
     {
         var array = new[] { 1, 2, 3, 4, 5 };
-        _sut = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
 
         unsafe
         {
@@ -274,9 +274,9 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void GetPinnableReference_FixedBlockForEmptyUnsafeList_ShouldReturnZeroPointer()
+    public void GetPinnableReference_FixedBlockForEmptyNativeList_ShouldReturnZeroPointer()
     {
-        _sut = new UnsafeList(0, typeof(int));
+        _sut = new NativeList(0, typeof(int));
 
         unsafe
         {
@@ -288,20 +288,20 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void GetPinnableReference_FixedBlockForVoidUnsafeList_ShouldThrow()
+    public void GetPinnableReference_FixedBlockForVoidNativeList_ShouldThrow()
     {
-        _sut = UnsafeList.Void;
+        _sut = NativeList.Void;
 
         Assert.Throws<InvalidOperationException>(() => _sut.AsFixed<int>());
     }
 
     [Fact]
-    public void Equality_UseEqualsAndOperatorsOnEmptyUnsafeList_ShouldReturnExpectedResults()
+    public void Equality_UseEqualsAndOperatorsOnEmptyNativeList_ShouldReturnExpectedResults()
     {
         var array = Array.Empty<int>();
 
-        _sut = UnsafeList.From<int>(array);
-        var tempList = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
+        var tempList = NativeList.From<int>(array);
 
         Assert.True(_sut == tempList);
         Assert.True(_sut.Equals(tempList));
@@ -316,12 +316,12 @@ public class UnsafeListTests : BaseTests
     }
 
     [Fact]
-    public void Equality_UseEqualsAndOperatorsOnUnsafeListWithItems_ShouldReturnExpectedResults()
+    public void Equality_UseEqualsAndOperatorsOnNativeListWithItems_ShouldReturnExpectedResults()
     {
         var array = new[] { 1, 2, 3, 4, 5 };
         
-        _sut = UnsafeList.From<int>(array);
-        var tempList = UnsafeList.From<int>(array);
+        _sut = NativeList.From<int>(array);
+        var tempList = NativeList.From<int>(array);
 
         Assert.False(_sut == tempList);
         Assert.False(_sut.Equals(tempList));
@@ -341,14 +341,14 @@ public class UnsafeListTests : BaseTests
     [InlineData(10)]
     [InlineData(100)]
     [InlineData(1000)]
-    public void ToString_CreateUnsafeList_ShouldContainNameTypeCountAndCapacity(int capacity)
+    public void ToString_CreateNativeList_ShouldContainNameTypeCountAndCapacity(int capacity)
     {
-        _sut = new UnsafeList(capacity, typeof(int));
+        _sut = new NativeList(capacity, typeof(int));
         _sut.TryAdd(Random.Shared.Next());
 
         var toString = _sut.ToString();
 
-        Assert.Contains(nameof(UnsafeList), toString);
+        Assert.Contains(nameof(NativeList), toString);
         Assert.Contains(nameof(Int32), toString);
         Assert.Contains(_sut.Count.ToString(), toString);
         Assert.Contains(_sut.Capacity.ToString(), toString);
