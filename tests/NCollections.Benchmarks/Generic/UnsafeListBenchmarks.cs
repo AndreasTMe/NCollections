@@ -115,7 +115,7 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ForEachLoopCategory)]
     public void ForEach_NativeList()
     {
-        foreach (var item in _unsafeList)
+        foreach (var item in _unsafeList.AsEnumerator())
         {
             var temp = item;
         }

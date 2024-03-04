@@ -1,5 +1,6 @@
-﻿using NCollections.Extensions;
-using NCollections.Helpers;
+﻿using NCollections.Generic;
+using NCollections.Internal.Extensions;
+using NCollections.Internal.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -209,7 +210,8 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
             _count = 0;
     }
 
-    public readonly Enumerator<TUnmanaged> AsEnumerator<TUnmanaged>(bool checkType = true)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly NativeEnumerator<TUnmanaged> AsEnumerator<TUnmanaged>(bool checkType = true)
         where TUnmanaged : unmanaged
     {
         if (checkType && !IsOfType<TUnmanaged>())
@@ -217,11 +219,12 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
 
         unsafe
         {
-            return new Enumerator<TUnmanaged>(_buffer, _count);
+            return new NativeEnumerator<TUnmanaged>(_buffer, _count);
         }
     }
 
-    public readonly PinnableReference<TUnmanaged> AsFixed<TUnmanaged>(bool checkType = true)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly NativePinnableReference<TUnmanaged> AsFixed<TUnmanaged>(bool checkType = true)
         where TUnmanaged : unmanaged
     {
         if (checkType && !IsOfType<TUnmanaged>())
@@ -229,7 +232,7 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
 
         unsafe
         {
-            return new PinnableReference<TUnmanaged>(_buffer, _count);
+            return new NativePinnableReference<TUnmanaged>(_buffer, _count);
         }
     }
 
@@ -296,77 +299,4 @@ public struct NativeList : IEquatable<NativeList>, IDisposable
     public static bool operator ==(NativeList lhs, NativeList rhs) => lhs.Equals(rhs);
 
     public static bool operator !=(NativeList lhs, NativeList rhs) => !(lhs == rhs);
-
-    public ref struct Enumerator<TUnmanaged>
-        where TUnmanaged : unmanaged
-    {
-        private readonly unsafe TUnmanaged* _buffer;
-        private readonly int _count;
-        private int _index;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal unsafe Enumerator(void* buffer, int count)
-        {
-            _buffer = (TUnmanaged*)buffer;
-            _count = count;
-            _index = -1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext()
-        {
-            var index = _index + 1;
-
-            if ((uint)index >= (uint)_count)
-            {
-                return false;
-            }
-
-            _index = index;
-
-            return true;
-        }
-
-        public readonly ref TUnmanaged Current
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                unsafe
-                {
-                    return ref _buffer[_index];
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly Enumerator<TUnmanaged> GetEnumerator() => this;
-    }
-
-    public ref struct PinnableReference<TUnmanaged>
-        where TUnmanaged : unmanaged
-    {
-        private readonly unsafe TUnmanaged* _buffer;
-        private readonly int _count;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal unsafe PinnableReference(void* buffer, int count)
-        {
-            _buffer = (TUnmanaged*)buffer;
-            _count = count;
-        }
-
-        public readonly ref TUnmanaged GetPinnableReference()
-        {
-            if (_count != 0)
-            {
-                unsafe
-                {
-                    return ref _buffer[0];
-                }
-            }
-
-            return ref Unsafe.NullRef<TUnmanaged>();
-        }
-    }
 }

@@ -1,5 +1,5 @@
-using NCollections.Extensions;
-using NCollections.Helpers;
+using NCollections.Internal.Extensions;
+using NCollections.Internal.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -201,25 +201,22 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
             _count = 0;
     }
     
-    public readonly Enumerator GetEnumerator()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly NativeEnumerator<TUnmanaged> AsEnumerator()
     {
         unsafe
         {
-            return new Enumerator(_buffer, _count);
+            return new NativeEnumerator<TUnmanaged>(_buffer, _count);
         }
     }
 
-    public readonly ref TUnmanaged GetPinnableReference()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly NativePinnableReference<TUnmanaged> AsFixed()
     {
-        if (_count != 0)
+        unsafe
         {
-            unsafe
-            {
-                return ref _buffer[0];
-            }
+            return new NativePinnableReference<TUnmanaged>(_buffer, _count);
         }
-
-        return ref Unsafe.NullRef<TUnmanaged>();
     }
 
     public void Dispose()
@@ -282,46 +279,4 @@ public struct NativeList<TUnmanaged> : IEquatable<NativeList<TUnmanaged>>, IDisp
     public static bool operator ==(NativeList<TUnmanaged> lhs, NativeList<TUnmanaged> rhs) => lhs.Equals(rhs);
 
     public static bool operator !=(NativeList<TUnmanaged> lhs, NativeList<TUnmanaged> rhs) => !(lhs == rhs);
-    
-    public ref struct Enumerator
-    {
-        private readonly unsafe TUnmanaged* _buffer;
-        private readonly int _count;
-        private int _index;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal unsafe Enumerator(TUnmanaged* buffer, int count)
-        {
-            _buffer = buffer;
-            _count = count;
-            _index = -1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext()
-        {
-            var index = _index + 1;
-
-            if ((uint)index >= (uint)_count)
-            {
-                return false;
-            }
-
-            _index = index;
-
-            return true;
-        }
-
-        public readonly ref TUnmanaged Current
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                unsafe
-                {
-                    return ref _buffer[_index];
-                }
-            }
-        }
-    }
 }

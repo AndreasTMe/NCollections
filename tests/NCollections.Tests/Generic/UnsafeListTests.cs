@@ -260,7 +260,7 @@ public class NativeListTests : BaseTests
     
         var count = 0;
 
-        foreach (var item in _sut)
+        foreach (var item in _sut.AsEnumerator())
         {
             Assert.True(_sut.TryGet(count, out var value));
             Assert.Equal(value, item);
@@ -279,7 +279,7 @@ public class NativeListTests : BaseTests
     
         unsafe
         {
-            fixed (int* pointer = _sut)
+            fixed (int* pointer = _sut.AsFixed())
             {
                 Assert.Equal(array[0], *pointer);
             }
@@ -293,7 +293,7 @@ public class NativeListTests : BaseTests
     
         unsafe
         {
-            fixed (int* pointer = _sut)
+            fixed (int* pointer = _sut.AsFixed())
             {
                 Assert.True(pointer == IntPtr.Zero.ToPointer());
             }
