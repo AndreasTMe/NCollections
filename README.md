@@ -8,20 +8,21 @@ memory block in native memory, so they can only store `unmanaged` types.
 
 #### Pros
 
--   No GC pressure
--   Equal or better performance than the standard collections (_`IndexOf` method will be improved with bitwise
-    comparisons_)
+- No GC pressure
+- Equal or better performance than the standard collections (_`IndexOf` method will be improved with bitwise
+  comparisons_)
 
 #### Cons
 
--   Need to be disposed manually
--   Only for `unmanaged` types
--   ...and probably more, but who cares? This is just for fun. :)
+- Need to be disposed manually
+- Only for `unmanaged` types
+- ...and probably more, but who cares? This is just for fun. :)
 
 ### Table of Contents
 
--   [NativeList](#nativelist)
--   [NativeList\<T>](#nativelistt)
+- [NativeList](#nativelist)
+- [NativeList\<T>](#nativelistt)
+- [NativeReadOnlyCollection\<T>](#nativereadonlycollectiont)
 
 ## NativeList
 
@@ -111,12 +112,6 @@ memory.
 
 _Find some `NativeList<T>` benchmarks [here](./.docs/native-list-generic.md)._
 
-### Why use it?
-
-Well, normally you wouldn't. The `List<T>` is a very good collection and it's very rare that you would need to use an
-unsafe version of it. However, if you are iterating a lot of data and you are trying to optimize your code, you might
-want to consider using this collection.
-
 ```csharp
 public struct Position
 {
@@ -129,7 +124,48 @@ public class PositionReader
 {
     public void Read(in NativeList<Position> positions)
     {
-        foreach (var position in positions)
+        foreach (var position in positions.AsEnumerator())
+        {
+            // Do something with the position
+        }
+    }
+}
+```
+
+## NativeReadOnlyCollection\<T>
+
+### Description
+
+Similar to a `ReadOnlyCollection<T>`. It's a collection that can store a variable number of elements in a contiguous
+block of native memory and it's read-only.
+
+_Find some `NativeReadOnlyCollection<T>` benchmarks [here](./.docs/native-read-only-collection.md)._
+
+```csharp
+// Program.cs
+var positions = new NativeList<Position>(10);
+
+// Add some positions
+// ...
+// Do something with the positions
+// ...
+
+// Pass the collection to the reader
+var reader = new PositionReader();
+reader.Read(positions.AsReadOnly());
+
+public struct Position
+{
+    public float X;
+    public float Y;
+    public float Z;
+}
+
+public class PositionReader
+{
+    public void Read(in ReadOnlyCollection<Position> positions)
+    {
+        foreach (var position in positions.AsEnumerator())
         {
             // Do something with the position
         }

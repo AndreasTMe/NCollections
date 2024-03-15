@@ -12,6 +12,7 @@ on:
                     - All
                     - Core.NativeListBenchmarks
                     - Generic.NativeListBenchmarks
+                    - Generic.NativeReadOnlyCollectionBenchmarks
 
 env:
     DOTNET_VERSION: "8.0.x"

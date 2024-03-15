@@ -1,0 +1,15 @@
+﻿<Project>
+
+    <PropertyGroup>
+        <PackageVersion>0.1.0</PackageVersion>
+        <LangVersion>latest</LangVersion>
+        <TargetFramework>net8.0</TargetFramework>
+
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup Condition="$(MSBuildProjectFullPath.ToLowerInvariant().Contains('src'))">
+        <None Include="$(MSBuildThisFileDirectory)\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+</Project>

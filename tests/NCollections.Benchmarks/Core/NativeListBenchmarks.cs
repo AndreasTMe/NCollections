@@ -25,7 +25,7 @@ public class NativeListBenchmarks
     private const string AddCategory = "5. Add";
     private const string RemoveCategory = "6. Remove";
 
-    private NativeList _unsafeList;
+    private NativeList _nativeList;
     private List<int> _list = null!;
     private ArrayList _arrayList = null!;
     private int[] _array = null!;
@@ -36,14 +36,14 @@ public class NativeListBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _unsafeList = new NativeList(Capacity, typeof(int));
+        _nativeList = new NativeList(Capacity, typeof(int));
         _array = new int[Capacity];
         _arrayList = new ArrayList(Capacity);
         _list = new List<int>(Capacity);
 
         for (var i = 0; i < Capacity; i++)
         {
-            _unsafeList.TryAdd(i, false);
+            _nativeList.TryAdd(i, false);
             _array[i] = i;
             _arrayList.Add(i);
             _list.Add(i);
@@ -53,7 +53,7 @@ public class NativeListBenchmarks
     [GlobalCleanup]
     public void Cleanup()
     {
-        _unsafeList.Dispose();
+        _nativeList.Dispose();
         _array = null!;
         _arrayList = null!;
         _list = null!;
@@ -97,9 +97,9 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ForLoopCategory)]
     public void For_NativeList()
     {
-        for (var i = 0; i < _unsafeList.Count; i++)
+        for (var i = 0; i < _nativeList.Count; i++)
         {
-            _unsafeList.TryGet(i, out int temp);
+            _nativeList.TryGet(i, out int temp);
         }
     }
 
@@ -107,9 +107,9 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ForLoopCategory)]
     public void For_NativeList_NoTypeCheck()
     {
-        for (var i = 0; i < _unsafeList.Count; i++)
+        for (var i = 0; i < _nativeList.Count; i++)
         {
-            _unsafeList.TryGet(i, out int temp, false);
+            _nativeList.TryGet(i, out int temp, false);
         }
     }
 
@@ -147,7 +147,7 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ForEachLoopCategory)]
     public void ForEach_NativeList()
     {
-        foreach (var item in _unsafeList.AsEnumerator<int>())
+        foreach (var item in _nativeList.AsEnumerator<int>())
         {
             var temp = item;
         }
@@ -157,7 +157,7 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ForEachLoopCategory)]
     public void ForEach_NativeList_NoTypeCheck()
     {
-        foreach (var item in _unsafeList.AsEnumerator<int>(false))
+        foreach (var item in _nativeList.AsEnumerator<int>(false))
         {
             var temp = item;
         }
@@ -201,14 +201,14 @@ public class NativeListBenchmarks
     [BenchmarkCategory(ContainsCategory)]
     public void Contains_NativeList()
     {
-        var contains = _unsafeList.Contains<int>(Capacity / 2);
+        var contains = _nativeList.Contains<int>(Capacity / 2);
     }
 
     [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(ContainsCategory)]
     public void Contains_NativeList_NoTypeCheck()
     {
-        var contains = _unsafeList.Contains<int>(Capacity / 2, false);
+        var contains = _nativeList.Contains<int>(Capacity / 2, false);
     }
 
     [Benchmark(Description = "Array")]
@@ -292,14 +292,14 @@ public class NativeListBenchmarks
     [BenchmarkCategory(RemoveCategory)]
     public void Remove_NativeList()
     {
-        _unsafeList.TryRemove<int>(Capacity / 2);
+        _nativeList.TryRemove<int>(Capacity / 2);
     }
 
     [Benchmark(Description = "NativeList")]
     [BenchmarkCategory(RemoveCategory)]
     public void Remove_NativeList_NoTypeCheck()
     {
-        _unsafeList.TryRemove<int>(Capacity / 2, false);
+        _nativeList.TryRemove<int>(Capacity / 2, false);
     }
 
     [Benchmark(Description = "ArrayList")]
