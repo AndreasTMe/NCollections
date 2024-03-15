@@ -40,6 +40,7 @@ public class NativeReadOnlyCollectionBenchmarks
 
         for (var i = 0; i < Capacity; i++)
         {
+            _nativeList.Add(i);
             nativeList.Add(i);
             _array[i] = i;
             _list.Add(i);

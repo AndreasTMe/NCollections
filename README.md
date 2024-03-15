@@ -1,6 +1,6 @@
 # Native Collections
 
-[![Tests](https://github.com/andreastdev/NCollections/actions/workflows/tests.yml/badge.svg)](https://github.com/andreastdev/NCollections/actions/workflows/tests.yml)
+[![Tests](https://github.com/andreastme/NCollections/actions/workflows/tests.yml/badge.svg)](https://github.com/andreastme/NCollections/actions/workflows/tests.yml)
 
 This is a repository where I am experimenting with unsafe code in C#. I'm trying to also write benchmarks to compare the
 performance of the unsafe code with the already existing code. All collections are struct wrappers around a pointer to a

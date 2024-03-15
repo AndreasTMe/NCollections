@@ -1,5 +1,3 @@
 ﻿using BenchmarkDotNet.Running;
 
-using System.Reflection;
-
-BenchmarkRunner.Run(Assembly.GetExecutingAssembly());
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);

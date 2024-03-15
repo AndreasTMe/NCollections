@@ -39,7 +39,7 @@ jobs:
               run: dotnet "./publish/NCollections.Benchmarks.dll" -f *
             - name: Run Selected Benchmarks
               if: ${{ github.event.inputs.selected_benchmarks != 'All' }}
-              run: dotnet "./publish/NCollections.Benchmarks.dll" -f "NCollections.Benchmarks.${{ github.event.inputs.selected_benchmarks }}"
+              run: dotnet "./publish/NCollections.Benchmarks.dll" -f "NCollections.Benchmarks.${{ github.event.inputs.selected_benchmarks }}*"
             - name: Upload Benchmark Results
               uses: actions/upload-artifact@v4
               with:
