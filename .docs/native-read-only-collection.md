@@ -1,4 +1,4 @@
-﻿# ReadOnlyCollection\<T>
+﻿# NativeReadOnlyCollection\<T>
 
 ### Table of Contents
 
